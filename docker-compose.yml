@@ -1,50 +1,67 @@
-version: "3.7"
-
 services:
-  app:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    image: auth-app
-    container_name: auth-app
-    restart: unless-stopped
-    working_dir: /var/www/html/containerized-laravel-platform/app/basic-auth-app
-    volumes:
-      - .:/var/www/html/containerized-laravel-platform/app/basic-auth-app
-      - ./storage:/var/www/html/containerized-laravel-platform/app/basic-auth-app/storage
-      - ./bootstrap/cache:/var/www/html/containerized-laravel-platform/app/basic-auth-app/bootstrap/cache
-    networks:
-      - auth-network
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: ${IMAGE}
+        container_name: laravel-app
+        restart: unless-stopped
+        depends_on:
+            db:
+                condition: service_healthy
+        env_file:
+            - .env
+        volumes:
+            - ./:/var/www/html
+        networks:
+            - app-network
 
-  db:
-    image: mysql:8.0
-    container_name: auth-db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: auth_breeze
-      MYSQL_ROOT_PASSWORD: Burangrang08!
-      MYSQL_PASSWORD: Burangrang08!
-      MYSQL_USER: netfusionid
-    volumes:
-      - dbdata:/var/lib/mysql
-    networks:
-      - auth-network
+    db:
+        image: mysql:8.0
+        container_name: mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - mysql-data:/var/lib/mysql
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mysqladmin",
+                    "ping",
+                    "-h",
+                    "localhost",
+                    "-uroot",
+                    "-p${DB_ROOT_PASSWORD}",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+        networks:
+            - app-network
 
-  nginx:
-    image: nginx:alpine
-    container_name: auth-nginx
-    restart: unless-stopped
-    ports:
-      - 80:80
-    volumes:
-      - .:/var/www/html/containerized-laravel-platform/app/basic-auth-app
-      - ./nginx/auth.conf:/etc/nginx/conf.d/auth.conf
-    networks:
-      - auth-network
+    nginx:
+        image: nginx:stable-alpine
+        container_name: nginx
+        restart: unless-stopped
+        depends_on:
+            - app
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www/html
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+        networks:
+            - app-network
 
 networks:
-  auth-network:
-    driver: bridge
+    app-network:
+        driver: bridge
 
 volumes:
-  dbdata:
+    mysql-data:
