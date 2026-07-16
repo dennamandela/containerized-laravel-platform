@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: auth-app
+    container_name: auth-app
+    restart: unless-stopped
+    working_dir: /var/www/html/containerized-laravel-platform/app/basic-auth-app
+    volumes:
+      - .:/var/www/html/containerized-laravel-platform/app/basic-auth-app
+      - ./storage:/var/www/html/containerized-laravel-platform/app/basic-auth-app/storage
+      - ./bootstrap/cache:/var/www/html/containerized-laravel-platform/app/basic-auth-app/bootstrap/cache
+    networks:
+      - auth-network
+
+  db:
+    image: mysql:8.0
+    container_name: auth-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: auth_breeze
+      MYSQL_ROOT_PASSWORD: Burangrang08!
+      MYSQL_PASSWORD: Burangrang08!
+      MYSQL_USER: netfusionid
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - auth-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: auth-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - .:/var/www/html/containerized-laravel-platform/app/basic-auth-app
+      - ./nginx/auth.conf:/etc/nginx/conf.d/auth.conf
+    networks:
+      - auth-network
+
+networks:
+  auth-network:
+    driver: bridge
+
+volumes:
+  dbdata:
