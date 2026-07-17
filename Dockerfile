@@ -13,7 +13,8 @@ RUN composer install \
     --no-dev \
     --prefer-dist \
     --no-interaction \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-scripts
 
 # Copy application source
 COPY . .
