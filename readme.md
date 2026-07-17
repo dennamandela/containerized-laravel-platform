@@ -34,7 +34,7 @@ The architecture is designed to keep the deployment simple while still following
 | Category                | Technology                  |
 | ----------------------- | --------------------------- |
 | Operating System        | Ubuntu Server 24.04 LTS     |
-| Application             | Laravel 12 (Laravel Breeze) |
+| Application             | Laravel 10 (Laravel Breeze) |
 | Web Server              | Nginx                       |
 | Database                | MySQL 8                     |
 | Containerization        | Docker                      |
@@ -86,7 +86,7 @@ DigitalOcean was selected because it offers:
 | ---------------- | ---------------- |
 | Operating System | Ubuntu 24.04 LTS |
 | vCPU             | 2                |
-| RAM              | 2 GB             |
+| RAM              | 4 GB             |
 | Storage          | 60 GB SSD        |
 | Public Network   | Enabled          |
 | Authentication   | SSH Key          |
@@ -103,22 +103,121 @@ For production environments, Infrastructure as Code (IaC) using Terraform would 
 
 ## 6. Containerization & Deployment
 
+The application is fully containerized using Docker and orchestrated with Docker Compose. Each component runs inside its own dedicated container following the single responsibility principle.
+
+### Application Stack
+
+| Service     | Description                  |
+| ----------- | ---------------------------- |
+| Laravel App | PHP-FPM application          |
+| Nginx       | Reverse proxy and web server |
+| MySQL 8     | Relational database          |
+
+### Docker Best Practices
+
+The Docker image is built following several production-oriented best practices:
+
+- Multi-stage Docker build
+- Minimal runtime image
+- Non-root application user (`www-data`)
+- Environment variables managed through `.env`
+- Docker Compose for multi-container orchestration
+- Dedicated Docker bridge network
+- Health check for PHP-FPM container
+
+### Deployment Process
+
+The deployment process is fully automated through Jenkins.
+
+1. Build Docker image
+2. Push image to Docker Hub
+3. Pull latest image on the target server
+4. Start containers using Docker Compose
+5. Validate application availability
+
+Using Docker ensures that every deployment uses the exact same application image, making deployments consistent, reproducible, and easy to maintain.
+
 ## 7. Monitoring & Logging
+
+> This section will be completed after the monitoring stack has been implemented.
 
 ## 8. Backup & Restore Strategy
 
+> This section will be completed after the backup and restore mechanism has been implemented.
+
 ## 9. CI/CD Pipeline
+
+Continuous Integration and Continuous Deployment (CI/CD) are implemented using Jenkins Multibranch Pipeline.
+
+### Pipeline Workflow
+
+```text
+Checkout Code
+        │
+        ▼
+Setup Environment Config
+        │
+        ▼
+Prepare Environment
+        │
+        ▼
+Build Docker Image
+        │
+        ▼
+Push to Docker Hub
+        │
+        ▼
+Manual Approval (Production Only)
+        │
+        ▼
+Deploy to Remote Server
+        │
+        ▼
+Post Deployment Validation
+```
+
+### Pipeline Features
+
+- Automatic source code checkout from GitHub
+- Environment-specific configuration
+- Docker image build automation
+- Docker Hub integration
+- Manual approval before production deployment
+- Automated deployment through SSH
+- Docker Compose based deployment
+- Post-deployment validation
+
+This pipeline minimizes manual deployment tasks while ensuring every deployment follows the same repeatable process.
 
 ## 10. Security Considerations
 
+> This section will be updated after all infrastructure components have been secured.
+
 ## 11. Production Considerations
+
+> This section will be updated after the complete solution has been implemented.
 
 ## 12. Future Improvements
 
+> Future improvements will be documented after the project implementation has been completed.
+
 ## 13. Project Structure
+
+> Repository structure will be documented after all project components have been organized.
 
 ## 14. Deployment Guide
 
+> Deployment instructions will be added after the infrastructure implementation is finalized.
+
 ## 15. Screenshots
 
+> Screenshots will be added after all components have been successfully deployed.
+
 ## 16. Author
+
+**Denna Mandela**
+
+DevOps Engineer
+
+- GitHub: https://github.com/dennamandela
+- LinkedIn: https://linkedin.com/in/dennamandela

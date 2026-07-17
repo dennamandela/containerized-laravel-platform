@@ -1,6 +1,5 @@
 services:
     app:
-        build:
         image: ${IMAGE}
         restart: unless-stopped
         depends_on:
@@ -8,8 +7,6 @@ services:
                 condition: service_healthy
         env_file:
             - .env
-        volumes:
-            - ./:/var/www/html
         networks:
             - app-network
 
